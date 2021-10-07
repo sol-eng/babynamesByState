@@ -1,0 +1,115 @@
+---
+title: "US Naming Trends"
+output: html_notebook
+---
+
+Full baby name data provided by the SSA by state. For the source data see [here](https://www.ssa.gov/oact/babynames/limits.html).
+
+## Setup
+
+Choose a method for reading file data. The names by state file contain over 6 million records.
+
+```{r setup}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(dplyr)
+library(ggplot2)
+library(readr)
+
+babynames <- read_csv("app/namesbystate.csv", col_types = cols(sex = col_character()))
+#babynames <- vroom::vroom("app/namesbystate.csv")
+#babynames <- data.table::fread("app/namesbystate.csv")
+```
+
+## Aggregate data by name
+
+Identify the top 1000 names.
+
+```{r}
+topNames <- babynames %>%
+  filter(year >= 1986) %>%  
+  group_by(name, sex) %>%
+  summarize(n = as.numeric(sum(n))) %>%
+  filter(n > 1000) %>%
+  select(name, sex)
+
+filteredNames <- babynames %>%
+  filter(year >= 1986) %>%
+  inner_join(topNames)
+
+yearlyNames <- filteredNames %>%
+  group_by(year, name, sex) %>%
+  summarize(n = as.numeric(sum(n)))
+```
+
+## Most popular names (1996)
+
+Identify the top 3 male and female names from 1986. Visualize the popularity trend over time.
+
+```{r}
+topNames1996 <- yearlyNames %>%
+  filter(year == 1996) %>%
+  group_by(name, sex) %>%
+  summarize(n = sum(n)) %>%
+  group_by(sex) %>%
+  mutate(rank = min_rank(desc(n))) %>%
+  filter(rank < 3) %>%
+  arrange(sex, rank) %>%
+  select(name, sex, rank)
+
+topNames1996Yearly <- yearlyNames %>%
+  inner_join(topNames1996)
+
+ggplot(topNames1996Yearly, aes(year, n, color=name)) +
+  facet_grid(~sex) +
+  geom_line() +
+  ggtitle("Most Popular Names of 1996")
+```
+
+## Most popular names (2020)
+
+Identify the top 3 male and female names from 2014. Visualize the popularity trend over time.
+
+```{r}
+topNames2020 <- yearlyNames %>%
+  filter(year == 2020) %>%
+  group_by(name, sex) %>%
+  summarize(n = sum(n)) %>%
+  group_by(sex) %>%
+  mutate(rank = min_rank(desc(n))) %>%
+  filter(rank <= 3) %>%
+  arrange(sex, rank) %>%
+  select(name, sex, rank)
+
+topNames2020Yearly <- yearlyNames %>%
+  inner_join(topNames2020)
+
+ggplot(topNames2020Yearly, aes(year, n, color=name)) +
+  facet_grid(~sex) +
+  geom_line() +
+  ggtitle("Most Popular Names of 2020")
+```
+
+## Shared names
+
+Visualize the most popular names that are shared by both males and females.
+
+```{r}
+sharedName <- babynames %>%
+  mutate(male = ifelse(sex == "M", n, 0), female = ifelse(sex == "F", n, 0)) %>%
+  group_by(name) %>%
+  summarize(Male = as.numeric(sum(male)), 
+            Female = as.numeric(sum(female)),
+            n = as.numeric(sum(n)),
+            AvgYear = round(as.numeric(sum(year * n) / sum(n)),0)) %>%
+  filter(Male > 50000 & Female > 50000)
+
+library(rbokeh)
+figure(width = NULL, height = NULL, 
+       xlab = "Log10 Number of Males", 
+       ylab = "Log10 Number of Females",
+       title = "Top shared names (1880 - 2020)") %>%
+  ly_points(log10(Male), log10(Female), data = sharedName,
+            color = AvgYear, size = scale(sqrt(n)),
+            hover = list(name, Male, Female, AvgYear), legend = FALSE) %>%
+  ly_abline(0, 1, color = "lightgrey")
+```
