@@ -2,7 +2,7 @@
 
 ### Data
 
-Source data come from [here](https://www.ssa.gov/oact/babynames/limits.html) and are downloaded using the `vroom` package. As of 2020, there were 6,215,834 records.
+Source data come from [here](https://www.ssa.gov/oact/babynames/limits.html) and are downloaded using the `vroom` package. As of 2020, there were 6,215,834 records. You should run `downloadData.R` before running the other files in this repos.
 
 ### Notebook
 
