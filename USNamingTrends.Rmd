@@ -26,14 +26,14 @@ Identify the top 1000 names.
 
 ```{r}
 topNames <- babynames %>%
-  filter(year >= 1986) %>%  
+  filter(year >= 1996) %>%  
   group_by(name, sex) %>%
   summarize(n = as.numeric(sum(n))) %>%
   filter(n > 1000) %>%
   select(name, sex)
 
 filteredNames <- babynames %>%
-  filter(year >= 1986) %>%
+  filter(year >= 1996) %>%
   inner_join(topNames)
 
 yearlyNames <- filteredNames %>%
