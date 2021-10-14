@@ -7,7 +7,7 @@ output: html_notebook
 
 These speaker notes are for a presentation called "[Scaling Spreadsheets with R](https://www.meetup.com/RStudio-Enterprise-Community-Meetup/events/281142283/)" delivered in October 2021 as part of the [RStudio Enterprise Community Meetup](https://www.meetup.com/RStudio-Enterprise-Community-Meetup/) series. This presentation discusses what to do when your Excel workbook grows too large or too complex.
 
-![](img/size-design-matrix.png)
+![](size-design-matrix.png)
 
 # Demo 1: Files are too large
 
@@ -71,31 +71,13 @@ Write data out for use later with the Shiny app:
 vroom_write(dat, "app/namesbystate.csv", delim = ",")
 ```
 
-## Status check
+# Status check
 
 *Spaceballs 1987*
 
 > This is now now. What happened to then? We passed then? When? Now! When will then be now? Soon!
 
-![](img/the-present-is-strange.jpeg "Spaceballs")
-
-## Exploratory analysis with R Notebooks
-
--   Read data
--   Aggregate data by name
--   Most popular names (1996)
--   Most popular names (2020)
--   Shared names
-
-```{r}
-rmarkdown::render("USNamingTrends.Rmd")
-```
-
-## Shiny App
-
-```{r}
-shiny::runApp("app")
-```
+![](the-present-is-strange.jpeg "Spaceballs")
 
 # Demo 2: Workbook is too complex
 
